@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# encoding=UTF-8
+
+# Copyright © 2021 Jakub Wilk <jwilk@jwilk.net>
+# SPDX-License-Identifier: MIT
+
+import argparse
+import random
+import sys
+
+import stdnum.ean
+
+...  # Python 3 is required
+
+
+def prefix_t(s):
+    if len(s) > 12:
+        raise ValueError
+    for dg in s:
+        if '0' <= dg <= '9':
+            continue
+        else:
+            raise ValueError
+    return s
+
+prefix_t.__name__ = 'EAN prefix'
+
+def main():
+    ap = argparse.ArgumentParser()
+    if sys.version_info < (3, 10):
+        # https://bugs.python.org/issue9694
+        ap._optionals.title = 'options'
+    ap.add_argument('prefix', metavar='PREFIX', default='', nargs='?', type=prefix_t)
+    opts = ap.parse_args()
+    ean = opts.prefix
+    while len(ean) < 12:
+        ean += str(random.randint(0, 9))
+    ean += stdnum.ean.calc_check_digit(ean)
+    assert stdnum.ean.is_valid(ean)
+    print(ean)
+
+if __name__ == '__main__':
+    main()
+
+# vim:ts=4 sts=4 sw=4 et
